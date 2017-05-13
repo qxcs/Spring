@@ -1,0 +1,62 @@
+一、IOC和Bean容器
+
+1、IOC是控制反转。   反转的是获得控制对象的过程，我们只负责使用，而容器负责创建和维护控制对象。这就是IOC的一种实现方式，DI即依赖注入。
+
+2、Bean容器初始化。   有三种方式
+	a、文件:    FileSystemXmlApplicationContext context=new FileSystemXmlApplicationContext("F:/workspace/appcontext.xml");
+	b、ClassPath:    ClassPathXmlApplicationContext context=new ClassPathXmlApplicationContext("classpath:spring-context-xml");
+	c、Web应用:   <listener>
+			<listener-class>org.springframework.web.context..ContextLoaderListener</listener-class>
+		      </listener>
+			或者
+		      <servlet>
+			<servlet-name>context</servlet-name>
+                        <servlet-class>org.springframework.web.context.ContextLoaderServlet</servlet-class>
+			<load-on-startup>1</load-on-startup>
+		      </servlet>
+
+3、Spring注入  看Daima(SpringFirst)
+	a、设值注入
+		<bean id="A" class="ClassA">		A类有一个对象是A
+			<property name="B" ref="BB">    A有一个属性，名字是B，B的值是BB，BB是哪儿来的呢
+		</bean>
+		
+		<bean id="BB" class="ClassB">   	BB是这里来的，是B类的一个对象。
+							这种方式，在A类里面必须有set方法
+	
+	b、构造注入
+		<bean id="A" class="ClassA">		
+			<constructor name="B" ref="BB">   
+		</bean>
+		
+		<bean id="BB" class="ClassB">   	大部分和设值注入一样，只不过给属性赋值使用的构造器。所以在A类里面必须有相应的构造方法。
+
+二、配置Bean
+
+1、Bean的作用域  写在bean里面
+	a、singleton： 单例
+	b、prototype： 每次请求创建新的实例，用完即销毁，destroy不生效
+	c、request： 每次http请求创建一个实例，仅在当前request内有效
+	d、session: 同上，仅在当前session内有效
+
+2、Bean的生命周期
+	a、定义
+	b、初始化  在定义的时候在bean标签中加上 (init-method="方法名"),就会在生成bean实例的时候调用这个方法  或者实现InitializingBean接口，覆盖afterpropertiesSet方法，这样就可以不用加上init-method标签
+	c、使用
+	d、销毁	  类似初始化，配置destroy-method  或者  实现DisposableBean接口，覆盖destroy方法
+
+	也可以配置全局的初始化和销毁方法，在beans标签中加上default-destroy-method和default-init-method元素。  [接口 优先于 配置的方法 优先于 全局的默认方法（且不会生效）]
+
+3、aware接口 (SpringFirst.aware)
+	实现了相应以aware结尾的接口的类，可以得到响应的对象。比如ApplicationContextAware,BeanNameAware接口
+
+4、bean的自动装配--Autowiring  不需要各种注入，在beans里面进行注入方式的配置。(SpringFirst.autoWiring)
+	No    
+	byName  根据名字
+	byType  根据类  
+	constructor 根据构造方法的参数的类
+	多个报错，一个正常，没有什么都不发生
+
+5、资源文件的统一接口---Resources（SpringFirst.getRources）
+	getResource("(classpath:从类路径里面获得文件)(file:从文件绝对路径获得文件)(url:从网上获得文件)(没有前缀:依赖于applicationContext,也就是看这个appliCaiton是怎么来的)");
+	

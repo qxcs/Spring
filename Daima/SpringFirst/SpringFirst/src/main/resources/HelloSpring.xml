@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans    
+                           http://www.springframework.org/schema/beans/spring-beans.xsd"
+          default-autowire="byName"        
+                           >
+	<bean id="helloWorld" class="springFirst.HelloSpringImpl">
+	</bean>
+	<bean id="myAware" class="aware.MyAware">
+	</bean>
+
+	<!-- 测试自动装配 -->
+	<bean id="myService" class="autoWiring.MyService">
+		<!-- <property name="myDAO" ref="myDAO"></property> 本来需要手动为MyService里的属性MyDAO赋值，现在自动赋值 -->
+	</bean>
+
+	<bean id="myDAO" class="autoWiring.MyDAO"></bean>
+	
+	<bean id="myResource" class="getResource.MyResource"></bean>
+</beans> 
