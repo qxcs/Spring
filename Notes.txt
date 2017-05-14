@@ -59,4 +59,17 @@
 
 5、资源文件的统一接口---Resources（SpringFirst.getRources）
 	getResource("(classpath:从类路径里面获得文件)(file:从文件绝对路径获得文件)(url:从网上获得文件)(没有前缀:依赖于applicationContext,也就是看这个appliCaiton是怎么来的)");
+
+三、Bean的注解
+
+1、类的自动检测及Bean的注册(SpringSecond.annotation)
+	a、需要在xml的beans标签里加上<context: component-scan   base-package="需要扫描的包"/>。  类被自动发现并注册的条件是:使用@Component,@Repository,@Service,@Controller或者使用@Component的自定义注解
+	b、在类注解后面可以加上名字属性，比如@Component("className"),不写就是默认类名首字母小写，然后在IOC容器中就要使用这个name获得实例。
+	c、可以在上面的标签中间添加子元素来进行选择性扫描<context:include-filter type="annotation" expression="org.springframework.stereotype.Repository">，这个例子表示忽略所有的@Reposirry注解
+	d、作用域 @Scope("范围如singleton")
 	
+2、Bean属性相关注解
+				a、@Required  适用于Bean属性的setter方法，表示这个属性必须在配置时被填充
+	(SpringSecond.autowired)b、@Autowired  可以注解在set方法上，也可以用于构造器或者成员变量。找不到合适的Bean就会抛出异常，可以在里面添加@Autowired(required=false)来避免，这表示这并不是必要的。需要注意的是，只有一个构造器被标记为required=true
+	(SpringSecond.mutiAutowired)c、@Autowired 也可以注解在数组对象上。比如有两个phone，分别是microPhone和smartPhone,那么set<Phone> phones里面就会有两个phone，两种各一个。
+				d、@Qualifier（beanName） 当按类型装配有多个bean的时候，用这个可以缩小范围
