@@ -5,6 +5,6 @@
                            http://www.springframework.org/schema/beans/spring-beans.xsd
 	                         http://www.springframework.org/schema/context
 	                           http://www.springframework.org/schema/context/spring-context.xsd">
-	<context:component-scan base-package="Annotation_Resource"></context:component-scan>	                       
+	<context:property-placeholder location="classpath:configuration.properties"/>	                       
 
 </beans> 

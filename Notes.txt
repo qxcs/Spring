@@ -60,16 +60,53 @@
 5、资源文件的统一接口---Resources（SpringFirst.getRources）
 	getResource("(classpath:从类路径里面获得文件)(file:从文件绝对路径获得文件)(url:从网上获得文件)(没有前缀:依赖于applicationContext,也就是看这个appliCaiton是怎么来的)");
 
-三、Bean的注解
+三、Bean的注解  需要在<beans>里面添加context等命名空间的声明。
 
 1、类的自动检测及Bean的注册(SpringSecond.annotation)
 	a、需要在xml的beans标签里加上<context: component-scan   base-package="需要扫描的包"/>。  类被自动发现并注册的条件是:使用@Component,@Repository,@Service,@Controller或者使用@Component的自定义注解
 	b、在类注解后面可以加上名字属性，比如@Component("className"),不写就是默认类名首字母小写，然后在IOC容器中就要使用这个name获得实例。
 	c、可以在上面的标签中间添加子元素来进行选择性扫描<context:include-filter type="annotation" expression="org.springframework.stereotype.Repository">，这个例子表示忽略所有的@Reposirry注解
 	d、作用域 @Scope("范围如singleton")
+	总结：类注解有@Component(默认的),@Repository(DAO，持久化层),@service(业务层),@Controller(控制层)
 	
 2、Bean属性相关注解
 				a、@Required  适用于Bean属性的setter方法，表示这个属性必须在配置时被填充
 	(SpringSecond.autowired)b、@Autowired  可以注解在set方法上，也可以用于构造器或者成员变量。找不到合适的Bean就会抛出异常，可以在里面添加@Autowired(required=false)来避免，这表示这并不是必要的。需要注意的是，只有一个构造器被标记为required=true
 	(SpringSecond.mutiAutowired)c、@Autowired 也可以注解在数组对象上。比如有两个phone，分别是microPhone和smartPhone,那么set<Phone> phones里面就会有两个phone，两种各一个。
 				d、@Qualifier（beanName） 当按类型装配有多个bean的时候，用这个可以缩小范围
+	(SpringSecond.Annotation_Bean)e、@Bean 用于类里面向IOC容器中添加对象，里面可以添加(name="beanID"，initMethod,destroyMethod等),如果不加name属性，就是方法名为beanID. 相当于xml里面的Bean标签。一般在类上使用@Configuration配合使用，表示是一个配置类
+
+3、资源文件获取
+					a、xml方式  在<beans>里面添加<context:property-placeholder  location="classpath:等等，也可以是绝对路径，前面介绍过"> ，作用是加载资源文件
+	(SpringSecond.Annotation_Resource)b、注解方式  类上面有@Configuration表示是配置文件 @ImportResource("路径")表示加载哪个资源文件;;  然后在属性前面通过@Value标签给属性赋值，通过@Bean加在方法上面，把得到的属性值生成一个对象。
+				总结：注解中类引用xml配置文件，xml配置文件解析真正的资源文件。value格式是@Value("${name}")
+
+4、对JSR的支持
+	a、@Resource  个人感觉类似@Bean,@Autowired
+	b、@PreDestroy @PostConstruct类似init-method,destroy-method
+
+四、AOP (SpringThird.aop)
+
+1、切面的声明在这个里面。 需要注意的是，声明切面什么的，都要先把类放到IOC里面。
+	下面这种方式，只支持单例模式
+	<aop:config>
+		<aop:aspect  id="" ref="">  切面相关配置
+			<aop:pointcut id="" expression="* 类名.*(..) and args(参数名，可以没有and后面的参数)"/>  切入点设置,切入点是执行动作的方法
+			<aop:before（aop:after-returning）(aop:after-throwing)(aop:after)（aop:around 注意这个method必须有一个ProceedingJoinPoint参数，然后返回Object，方法里面pjp.proceed表示开始执行切入点，在这前后都可以执行切面自己的动作）  pointcut-ref=""(这里也可以是pointcut="相当于把expression写进来")  method=""/> advice设置，类似广播
+			<aop:declare-parents types-matching="expressio表达式" implement-interface="接口" default-impl="接口的实现类"/>   给所有满足matching的类声明一个实现指定接口的父类，和多态很像。
+		</aop:aspect>
+	</aop:config>
+	解析：首先声明切面之后，声明切入点相当于的定义了一个广播，一旦expression里面的方法被执行了，那么就会发出广播，也就是接下来定义的advice，而这个advice会调用一些方法，这些方法就是在advice的method里面定义。
+
+
+五、@Aspect  (SpringThird.aspectj)  在类上声明为切面  要被bean容器识别经常与@Component配合使用，或者手工在xml文件里声明为bean
+
+1、@Pointcut("excution=" expression表达式"或者within等等 && args(name,..)") 声明在方法上，返回值一定要是void。 后面&& args()可以传入参数
+
+2、@Pointcut("切入点方法 && 切入点方法") 组合切入点，就是把那两个切入点方法的切入点范围组合一下，可以&&,||,!。
+
+3、@Before,@AfterReturning,@AfterThrowing,@After，@Around(第一个参数必须是ProceedingJoinPoint)声明advice方法.  @AfterReturn中可以加上这两个属性@AfterReturning(pointcut="" returning="返回值名字") ,同样的@AfterThrowing可以加上throwing表示接收返回的异常
+
+4、@declare-parents对应xml里面的declare-parents
+总结：@Pointcut其实就是用一个方法名来代表切入点，后面在写需要执行的advice方法的时候就可以使用这些方法，来免去写具体的expression表达式，也更方便组合。但是其实可以不用@Pointcut,只需要直接@Before("expression").
+	@After一般用来释放资源，类似try-catch中的finally。
